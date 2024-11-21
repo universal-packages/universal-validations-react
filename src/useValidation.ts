@@ -16,19 +16,27 @@ interface UseValidationReturn<A> {
   showErrors: boolean
   setShowErrors: React.Dispatch<React.SetStateAction<boolean>>
   setKnownErrors: React.Dispatch<React.SetStateAction<ValidationErrors<A>>>
+  reset: (newInitialValues: Partial<A>) => void
 }
 
-export function useValidation<A extends Record<string, any>>(attributes: A, ValidationClass: typeof BaseValidation): UseValidationReturn<A> {
+export function useValidation<A extends Record<string, any>>(attributes: Partial<A>, ValidationClass: typeof BaseValidation): UseValidationReturn<A> {
   const [errors, setErrors] = React.useState<ValidationErrors<A>>({})
   const [showErrors, setShowErrors] = React.useState(false)
   const [knownErrors, setKnownErrors] = React.useState<ValidationErrors<A>>({})
   const [knownErrorsMatches, setKnownErrorsMatches] = React.useState<Partial<A>>({})
+  const [validationInstance, setValidationInstance] = React.useState(() => new ValidationClass(attributes))
 
-  const validationInstance = React.useMemo(() => new ValidationClass(attributes), [ValidationClass])
+  const reset = (newInitialValues: A) => {
+    setValidationInstance(new ValidationClass(newInitialValues))
+    setErrors({})
+    setShowErrors(false)
+    setKnownErrors({})
+    setKnownErrorsMatches({})
+  }
 
   React.useEffect(() => {
-    const knownErrorKeys = Object.keys(knownErrors)
-    const knownErrorsMatchesProspects = {}
+    const knownErrorKeys = Object.keys(knownErrors) as (keyof A)[]
+    const knownErrorsMatchesProspects: Partial<A> = {}
 
     for (const key of knownErrorKeys) {
       knownErrorsMatchesProspects[key] = attributes[key]
@@ -67,7 +75,7 @@ export function useValidation<A extends Record<string, any>>(attributes: A, Vali
       return obj
     }, {})
 
-  return { changedAttributes, thereAreChanges: !!Object.keys(changedAttributes).length, errors, isValid, isInvalid, showErrors, setShowErrors, setKnownErrors }
+  return { changedAttributes, thereAreChanges: !!Object.keys(changedAttributes).length, errors, isValid, isInvalid, showErrors, setShowErrors, setKnownErrors, reset }
 }
 
 function theyAreTheSame(a: any, b: any) {

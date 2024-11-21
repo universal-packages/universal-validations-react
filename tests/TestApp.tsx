@@ -24,6 +24,12 @@ export default function TestApp(): React.ReactElement {
     }
   }
 
+  const handleReset = () => {
+    setName('omar')
+    setShowSuccess(false)
+    validation.reset({ name: 'omar' })
+  }
+
   return (
     <div>
       <h1>Test Component</h1>
@@ -31,6 +37,9 @@ export default function TestApp(): React.ReactElement {
       <input data-testid="name-input" type="text" value={name} onChange={(e) => setName(e.target.value)} />
       <button onClick={handleSubmit} data-testid="submit">
         Submit
+      </button>
+      <button onClick={handleReset} data-testid="reset">
+        Reset
       </button>
       {showSuccess && <p data-testid="success">Success</p>}
       {validation.showErrors && !validation.isValid && <p data-testid="errors">Errors: {JSON.stringify(validation.errors)}</p>}

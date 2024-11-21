@@ -66,4 +66,32 @@ describe('validation-react', (): void => {
     expect(screen.queryByTestId('errors')).toBeInTheDocument()
     expect(screen.queryByTestId('errors')).toHaveTextContent('Errors: {"name":["name failed nameIsDavid validation"]}')
   })
+
+  it('allows to reset the validation', async (): Promise<void> => {
+    render(<TestApp />)
+
+    expect(screen.queryByTestId('success')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('errors')).not.toBeInTheDocument()
+
+    await waitFor(async () => {
+      fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'robert' } })
+    })
+
+    expect(screen.queryByTestId('changed')).toHaveTextContent('{"name":"robert"}')
+
+    await waitFor(async () => {
+      fireEvent.click(screen.getByText('Submit'))
+    })
+
+    expect(screen.queryByTestId('success')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('errors')).toBeInTheDocument()
+    expect(screen.queryByTestId('errors')).toHaveTextContent('Errors: {"name":["name failed nameIsDavid validation"]}')
+
+    await waitFor(async () => {
+      fireEvent.click(screen.getByText('Reset'))
+    })
+
+    expect(screen.queryByTestId('success')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('errors')).not.toBeInTheDocument()
+  })
 })
