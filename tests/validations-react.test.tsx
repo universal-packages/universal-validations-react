@@ -15,6 +15,8 @@ describe('validation-react', (): void => {
       fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'David' } })
     })
 
+    expect(screen.queryByTestId('changed')).toHaveTextContent('{"name":"David"}')
+
     await waitFor(async () => {
       fireEvent.click(screen.getByText('Submit'))
     })
@@ -33,6 +35,8 @@ describe('validation-react', (): void => {
       fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'robert' } })
     })
 
+    expect(screen.queryByTestId('changed')).toHaveTextContent('{"name":"robert"}')
+
     await waitFor(async () => {
       fireEvent.click(screen.getByText('Submit'))
     })
@@ -50,6 +54,8 @@ describe('validation-react', (): void => {
     await waitFor(async () => {
       fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'omar' } })
     })
+
+    expect(screen.queryByTestId('changed')).toHaveTextContent('{}')
 
     expect(screen.queryByTestId('errors')).not.toBeInTheDocument()
 

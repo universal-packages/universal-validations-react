@@ -1,25 +1,31 @@
 import { BaseValidation } from '@universal-packages/validations'
 import React from 'react'
 
-interface UseValidationResult {
-  errors: Record<string, string[]>
+type ValidationErrors<A> = {
+  [K in keyof A]?: string[]
+}
+
+interface UseValidationReturn<A> {
+  changedAttributes: Partial<A>
+  errors: ValidationErrors<A>
   isValid: boolean
   isInvalid: boolean
   showErrors: boolean
-  setShowErrors: (showErrors: boolean) => void
-  setKnownErrors: (knownErrors: Record<string, string[]>) => void
+  setShowErrors: React.Dispatch<React.SetStateAction<boolean>>
+  setKnownErrors: React.Dispatch<React.SetStateAction<ValidationErrors<A>>>
 }
 
-export function useValidation(attributes: Record<string, any>, Validation: typeof BaseValidation): UseValidationResult {
-  const [errors, setErrors] = React.useState<Record<string, string[]>>({})
+export function useValidation<A extends Record<string, any>>(attributes: A, ValidationClass: typeof BaseValidation): UseValidationReturn<A> {
+  const [errors, setErrors] = React.useState<ValidationErrors<A>>({})
   const [showErrors, setShowErrors] = React.useState(false)
-  const [knownErrors, setKnownErrors] = React.useState<Record<string, string[]>>({})
-  const [knownErrorsMatches, setKnownErrorsMatches] = React.useState<Record<string, any>>({})
-  const validationInstance = React.useMemo(() => new Validation(attributes), [Validation])
+  const [knownErrors, setKnownErrors] = React.useState<ValidationErrors<A>>({})
+  const [knownErrorsMatches, setKnownErrorsMatches] = React.useState<Partial<A>>({})
+
+  const validationInstance = React.useMemo(() => new ValidationClass(attributes), [ValidationClass])
 
   React.useEffect(() => {
-    const knownErrorKeys = Object.keys(knownErrors)
-    const knownErrorsMatchesProspects: Record<string, any> = {}
+    const knownErrorKeys = Object.keys(knownErrors) as (keyof A)[]
+    const knownErrorsMatchesProspects: Partial<A> = {}
 
     for (const key of knownErrorKeys) {
       knownErrorsMatchesProspects[key] = attributes[key]
@@ -29,29 +35,36 @@ export function useValidation(attributes: Record<string, any>, Validation: typeo
   }, [...Object.values(attributes), knownErrors])
 
   React.useEffect(() => {
-    validationInstance.validate(attributes).then(({ errors }) => {
-      const knownErrorKeys = Object.keys(knownErrors)
+    validationInstance.validate(attributes).then((validationResult) => {
+      const validationErrors = validationResult.errors as ValidationErrors<A>
+      const knownErrorKeys = Object.keys(knownErrors) as (keyof A)[]
 
       for (const key of knownErrorKeys) {
         if (theyAreTheSame(knownErrorsMatches[key], attributes[key])) {
-          if (errors[key]) {
-            errors[key] = [...errors[key], ...knownErrors[key]].filter((value, index, array) => {
+          if (validationErrors[key]) {
+            validationErrors[key] = [...validationErrors[key], ...knownErrors[key]].filter((value, index, array) => {
               return array.indexOf(value) === index
             })
           } else {
-            errors[key] = knownErrors[key]
+            validationErrors[key] = knownErrors[key]
           }
         }
       }
 
-      setErrors(errors)
+      setErrors(validationErrors)
     })
   }, [...Object.values(attributes), knownErrors, knownErrorsMatches, validationInstance])
 
   const isValid = !Object.keys(errors).length
   const isInvalid = !isValid
+  const changedAttributes: Partial<A> = Object.keys(attributes)
+    .filter((key) => attributes[key] !== validationInstance.initialValues[key])
+    .reduce((obj, key) => {
+      obj[key] = attributes[key]
+      return obj
+    }, {})
 
-  return { errors, isValid: !Object.keys(errors).length, isInvalid, showErrors, setShowErrors, setKnownErrors }
+  return { changedAttributes, errors, isValid, isInvalid, showErrors, setShowErrors, setKnownErrors }
 }
 
 function theyAreTheSame(a: any, b: any) {

@@ -34,6 +34,7 @@ export default function TestApp(): React.ReactElement {
       </button>
       {showSuccess && <p data-testid="success">Success</p>}
       {validation.showErrors && !validation.isValid && <p data-testid="errors">Errors: {JSON.stringify(validation.errors)}</p>}
+      <p data-testid="changed">{JSON.stringify(validation.changedAttributes)}</p>
     </div>
   )
 }
