@@ -1,0 +1,67 @@
+{
+  "name": "@universal-packages/validations-react",
+  "version": "0.0.0",
+  "description": "React bindings for universal validations",
+  "author": "David De Anda <david@universal-packages.com> (https://github.com/universal-packages)",
+  "license": "MIT",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "repository": "git@github.com:universal-packages/universal-validations-react.git",
+  "scripts": {
+    "build": "tsc --p tsconfig.dis.json",
+    "test": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:clear": "jest --clearCache",
+    "format": "prettier --write \"./{src,tests}/**/*.{ts,tsx,js,jsx,json}\"",
+    "update-universal-dependencies": "umaintenance update-universal-dependencies"
+  },
+  "dependencies": {
+    "@universal-packages/validations": "^1.2.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^14.0.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^18.11.9",
+    "@types/react": "^18.2.28",
+    "@universal-packages/maintenance": "^1.6.9",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^28.1.1",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
+    "collectCoverageFrom": [
+      "src/**/*.(ts|tsx)"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.ts"
+    ]
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 180,
+    "trailingComma": "none",
+    "plugins": [
+      "@trivago/prettier-plugin-sort-imports"
+    ],
+    "importOrder": [
+      "^[./]"
+    ],
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true,
+    "importOrderParserPlugins": [
+      "typescript",
+      "jsx",
+      "classProperties",
+      "decorators-legacy"
+    ]
+  }
+}
