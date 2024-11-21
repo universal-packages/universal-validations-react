@@ -9,6 +9,7 @@ type ValidationErrors<A> = {
 
 interface UseValidationReturn<A> {
   changedAttributes: Partial<A>
+  thereAreChanges: boolean
   errors: ValidationErrors<A>
   isValid: boolean
   isInvalid: boolean
@@ -66,7 +67,7 @@ export function useValidation<A extends Record<string, any>>(attributes: A, Vali
       return obj
     }, {})
 
-  return { changedAttributes, errors, isValid, isInvalid, showErrors, setShowErrors, setKnownErrors }
+  return { changedAttributes, thereAreChanges: !!Object.keys(changedAttributes).length, errors, isValid, isInvalid, showErrors, setShowErrors, setKnownErrors }
 }
 
 function theyAreTheSame(a: any, b: any) {
