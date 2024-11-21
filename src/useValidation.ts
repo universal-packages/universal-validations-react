@@ -3,6 +3,8 @@ import React from 'react'
 
 type ValidationErrors<A> = {
   [K in keyof A]?: string[]
+} & {
+  [key: string]: string[]
 }
 
 interface UseValidationReturn<A> {
@@ -24,8 +26,8 @@ export function useValidation<A extends Record<string, any>>(attributes: A, Vali
   const validationInstance = React.useMemo(() => new ValidationClass(attributes), [ValidationClass])
 
   React.useEffect(() => {
-    const knownErrorKeys = Object.keys(knownErrors) as (keyof A)[]
-    const knownErrorsMatchesProspects: Partial<A> = {}
+    const knownErrorKeys = Object.keys(knownErrors)
+    const knownErrorsMatchesProspects = {}
 
     for (const key of knownErrorKeys) {
       knownErrorsMatchesProspects[key] = attributes[key]
@@ -44,7 +46,7 @@ export function useValidation<A extends Record<string, any>>(attributes: A, Vali
           if (validationErrors[key]) {
             validationErrors[key] = [...validationErrors[key], ...knownErrors[key]].filter((value, index, array) => {
               return array.indexOf(value) === index
-            })
+            }) as any
           } else {
             validationErrors[key] = knownErrors[key]
           }
