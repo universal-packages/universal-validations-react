@@ -24,6 +24,7 @@ export function useValidation<A extends Record<string, any>>(attributes: Partial
   const [showErrors, setShowErrors] = React.useState(false)
   const [knownErrors, setKnownErrors] = React.useState<ValidationErrors<A>>({})
   const [knownErrorsMatches, setKnownErrorsMatches] = React.useState<Partial<A>>({})
+  const [extraErrorsMatches, setExtraErrorsMatches] = React.useState<Record<string, Partial<A>>>({})
   const [validationInstance, setValidationInstance] = React.useState(() => new ValidationClass(attributes))
 
   const reset = (newInitialValues: A) => {
@@ -39,11 +40,24 @@ export function useValidation<A extends Record<string, any>>(attributes: Partial
     const knownErrorsMatchesProspects: Partial<A> = {}
 
     for (const key of knownErrorKeys) {
-      knownErrorsMatchesProspects[key] = attributes[key]
+      if (attributes[key] !== undefined) {
+        knownErrorsMatchesProspects[key] = attributes[key]
+      }
+    }
+  }, [...Object.values(attributes), knownErrors])
+
+  React.useEffect(() => {
+    const knownErrorKeys = Object.keys(knownErrors) as (keyof A)[]
+    const extraErrorsMatchesProspects: Record<string, Partial<A>> = {}
+
+    for (const key of knownErrorKeys) {
+      if (attributes[key] === undefined) {
+        extraErrorsMatchesProspects[key as string] = { ...attributes }
+      }
     }
 
-    setKnownErrorsMatches(knownErrorsMatchesProspects)
-  }, [...Object.values(attributes), knownErrors])
+    setExtraErrorsMatches(extraErrorsMatchesProspects)
+  }, [knownErrors])
 
   React.useEffect(() => {
     validationInstance.validate(attributes).then((validationResult) => {
@@ -51,20 +65,28 @@ export function useValidation<A extends Record<string, any>>(attributes: Partial
       const knownErrorKeys = Object.keys(knownErrors) as (keyof A)[]
 
       for (const key of knownErrorKeys) {
-        if (theyAreTheSame(knownErrorsMatches[key], attributes[key])) {
-          if (validationErrors[key]) {
-            validationErrors[key] = [...validationErrors[key], ...knownErrors[key]].filter((value, index, array) => {
+        if (knownErrorsMatches[key]) {
+          if (theyAreTheSame(knownErrorsMatches[key], attributes[key])) {
+            if (validationErrors[key]) {
+              validationErrors[key] = [...validationErrors[key], ...knownErrors[key]].filter((value, index, array) => {
+                return array.indexOf(value) === index
+              }) as any
+            } else {
+              validationErrors[key] = knownErrors[key]
+            }
+          }
+        } else if (extraErrorsMatches[key as string]) {
+          if (theyAreTheSame(extraErrorsMatches[key as string], attributes)) {
+            validationErrors[key] = [...knownErrors[key]].filter((value, index, array) => {
               return array.indexOf(value) === index
             }) as any
-          } else {
-            validationErrors[key] = knownErrors[key]
           }
         }
       }
 
       setErrors(validationErrors)
     })
-  }, [...Object.values(attributes), knownErrors, knownErrorsMatches, validationInstance])
+  }, [...Object.values(attributes), knownErrors, knownErrorsMatches, validationInstance, extraErrorsMatches])
 
   const isValid = !Object.keys(errors).length
   const isInvalid = !isValid
@@ -81,6 +103,8 @@ export function useValidation<A extends Record<string, any>>(attributes: Partial
 function theyAreTheSame(a: any, b: any) {
   if (Array.isArray(a) && Array.isArray(b)) {
     return a.length === b.length && a.every((value, index) => value === b[index])
+  } else if (typeof a === 'object' && typeof b === 'object') {
+    return JSON.stringify(a) === JSON.stringify(b)
   } else {
     return a === b
   }

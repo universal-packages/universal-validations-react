@@ -25,7 +25,7 @@ describe('validation-react', (): void => {
     expect(screen.queryByTestId('errors')).not.toBeInTheDocument()
   })
 
-  it('shows errors en decided and keep calculating the validation on changes', async (): Promise<void> => {
+  it('shows errors and keep calculating the validation on changes', async (): Promise<void> => {
     render(<TestApp />)
 
     expect(screen.queryByTestId('success')).not.toBeInTheDocument()
@@ -65,6 +65,13 @@ describe('validation-react', (): void => {
 
     expect(screen.queryByTestId('errors')).toBeInTheDocument()
     expect(screen.queryByTestId('errors')).toHaveTextContent('Errors: {"name":["name failed nameIsDavid validation"]}')
+
+    await waitFor(async () => {
+      fireEvent.click(screen.getByText('Extra errors'))
+    })
+
+    expect(screen.queryByTestId('errors')).toBeInTheDocument()
+    expect(screen.queryByTestId('errors')).toHaveTextContent('Errors: {"name":["name failed nameIsDavid validation"],"other":["Extra errors"]}')
   })
 
   it('allows to reset the validation', async (): Promise<void> => {
@@ -93,5 +100,37 @@ describe('validation-react', (): void => {
 
     expect(screen.queryByTestId('success')).not.toBeInTheDocument()
     expect(screen.queryByTestId('errors')).not.toBeInTheDocument()
+  })
+
+  it('show extra errors when fields match', async (): Promise<void> => {
+    render(<TestApp />)
+
+    expect(screen.queryByTestId('success')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('errors')).not.toBeInTheDocument()
+
+    await waitFor(async () => {
+      fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'David' } })
+    })
+
+    await waitFor(async () => {
+      fireEvent.click(screen.getByText('Extra errors'))
+    })
+
+    expect(screen.queryByTestId('errors')).toBeInTheDocument()
+    expect(screen.queryByTestId('errors')).toHaveTextContent('Errors: {"other":["Extra errors"]}')
+
+    await waitFor(async () => {
+      fireEvent.change(screen.getByTestId('name-input'), { target: { value: '' } })
+    })
+
+    expect(screen.queryByTestId('errors')).toBeInTheDocument()
+    expect(screen.queryByTestId('errors')).toHaveTextContent('Errors: {"name":["name failed nameIsDavid validation"]}')
+
+    await waitFor(async () => {
+      fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'David' } })
+    })
+
+    expect(screen.queryByTestId('errors')).toBeInTheDocument()
+    expect(screen.queryByTestId('errors')).toHaveTextContent('Errors: {"other":["Extra errors"]}')
   })
 })

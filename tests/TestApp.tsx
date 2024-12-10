@@ -30,6 +30,11 @@ export default function TestApp(): React.ReactElement {
     validation.reset({ name: 'omar' })
   }
 
+  const handleSetKnownErrors = () => {
+    validation.setShowErrors(true)
+    validation.setKnownErrors({ other: ['Extra errors'] })
+  }
+
   return (
     <div>
       <h1>Test Component</h1>
@@ -41,8 +46,11 @@ export default function TestApp(): React.ReactElement {
       <button onClick={handleReset} data-testid="reset">
         Reset
       </button>
+      <button onClick={handleSetKnownErrors} data-testid="set-known-errors">
+        Extra errors
+      </button>
       {showSuccess && <p data-testid="success">Success</p>}
-      {validation.showErrors && !validation.isValid && <p data-testid="errors">Errors: {JSON.stringify(validation.errors)}</p>}
+      {validation.showErrors && validation.isInvalid && <p data-testid="errors">Errors: {JSON.stringify(validation.errors)}</p>}
       <p data-testid="changed">{JSON.stringify(validation.changedAttributes)}</p>
     </div>
   )
