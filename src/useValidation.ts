@@ -44,7 +44,9 @@ export function useValidation<A extends Record<string, any>>(attributes: Partial
         knownErrorsMatchesProspects[key] = attributes[key]
       }
     }
-  }, [...Object.values(attributes), knownErrors])
+
+    setKnownErrorsMatches(knownErrorsMatchesProspects)
+  }, [knownErrors])
 
   React.useEffect(() => {
     const knownErrorKeys = Object.keys(knownErrors) as (keyof A)[]
