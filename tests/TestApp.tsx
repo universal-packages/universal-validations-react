@@ -9,12 +9,18 @@ class TestValidation extends BaseValidation {
     if (initialName === name) return true
     return name === 'David'
   }
+
+  @Validator('name', { schema: 'admin' })
+  public nameIsAdmin(name: string): boolean {
+    return name === 'Admin'
+  }
 }
 
 export default function TestApp(): React.ReactElement {
   const [name, setName] = React.useState('omar')
+  const [schema, setSchema] = React.useState<string | string[] | undefined>(undefined)
   const [showSuccess, setShowSuccess] = React.useState(false)
-  const validation = useValidation({ name }, TestValidation)
+  const validation = useValidation({ name }, TestValidation, schema)
 
   const handleSubmit = () => {
     if (validation.isValid) {
@@ -26,6 +32,7 @@ export default function TestApp(): React.ReactElement {
 
   const handleReset = () => {
     setName('omar')
+    setSchema(undefined)
     setShowSuccess(false)
     validation.reset({ name: 'omar' })
   }
@@ -33,6 +40,10 @@ export default function TestApp(): React.ReactElement {
   const handleSetKnownErrors = () => {
     validation.setShowErrors(true)
     validation.setKnownErrors({ other: ['Extra errors'] })
+  }
+
+  const handleSetAdminSchema = () => {
+    setSchema('admin')
   }
 
   return (
@@ -49,6 +60,10 @@ export default function TestApp(): React.ReactElement {
       <button onClick={handleSetKnownErrors} data-testid="set-known-errors">
         Extra errors
       </button>
+      <button onClick={handleSetAdminSchema} data-testid="set-admin-schema">
+        Use Admin Schema
+      </button>
+      {schema && <p data-testid="schema">Using schema: {JSON.stringify(schema)}</p>}
       {showSuccess && <p data-testid="success">Success</p>}
       {validation.showErrors && validation.isInvalid && <p data-testid="errors">Errors: {JSON.stringify(validation.errors)}</p>}
       <p data-testid="changed">{JSON.stringify(validation.changedAttributes)}</p>

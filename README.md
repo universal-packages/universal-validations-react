@@ -16,9 +16,11 @@ npm install @universal-packages/validations-react
 
 ## Hooks
 
-#### **`useValidation(attributes: Object, Validation: ValidationClass)`**
+#### **`useValidation(attributes: Object, Validation: ValidationClass, schema?: string | string[])`**
 
 It validates the attributes every time they change, and returns the validation result. The values when first called the hook will be considered as the initial values.
+
+The optional `schema` parameter allows you to specify which validation schema to use. This corresponds to the schema option in the Validator decorator.
 
 ```jsx
 import { useValidation } from '@universal-packages/validations-react'
@@ -58,6 +60,21 @@ const HappyComponent = () => {
       )}
     </div>
   )
+}
+```
+
+### Using Schemas
+
+```jsx
+import { useValidation } from '@universal-packages/validations-react'
+import UserValidation from './UserValidation'
+
+const EditUserForm = () => {
+  const [userData, setUserData] = useState({ email: 'user@example.com', name: 'John' })
+  // Use the 'update' schema for validations specific to updating a user
+  const validation = useValidation(userData, UserValidation, 'update')
+  
+  // Rest of component...
 }
 ```
 

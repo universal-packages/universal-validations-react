@@ -19,7 +19,11 @@ interface UseValidationReturn<A> {
   reset: (newInitialValues: Partial<A>) => void
 }
 
-export function useValidation<A extends Record<string, any>>(attributes: Partial<A>, ValidationClass: typeof BaseValidation): UseValidationReturn<A> {
+export function useValidation<A extends Record<string, any>>(
+  attributes: Partial<A>, 
+  ValidationClass: typeof BaseValidation, 
+  schema?: string | string[]
+): UseValidationReturn<A> {
   const [errors, setErrors] = React.useState<ValidationErrors<A>>({})
   const [showErrors, setShowErrors] = React.useState(false)
   const [knownErrors, setKnownErrors] = React.useState<ValidationErrors<A>>({})
@@ -62,7 +66,7 @@ export function useValidation<A extends Record<string, any>>(attributes: Partial
   }, [knownErrors])
 
   React.useEffect(() => {
-    validationInstance.validate(attributes).then((validationResult) => {
+    validationInstance.validate(attributes, schema).then((validationResult) => {
       const validationErrors = validationResult.errors as ValidationErrors<A>
       const knownErrorKeys = Object.keys(knownErrors) as (keyof A)[]
 
@@ -88,7 +92,7 @@ export function useValidation<A extends Record<string, any>>(attributes: Partial
 
       setErrors(validationErrors)
     })
-  }, [...Object.values(attributes), knownErrors, knownErrorsMatches, validationInstance, extraErrorsMatches])
+  }, [...Object.values(attributes), knownErrors, knownErrorsMatches, validationInstance, extraErrorsMatches, schema])
 
   const isValid = !Object.keys(errors).length
   const isInvalid = !isValid
