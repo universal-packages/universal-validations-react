@@ -1,29 +1,9 @@
 import { BaseValidation } from '@universal-packages/validations'
 import React from 'react'
 
-type ValidationErrors<A> = {
-  [K in keyof A]?: string[]
-} & {
-  [key: string]: string[]
-}
+import { UseValidationReturn, ValidationErrors } from './types'
 
-interface UseValidationReturn<A> {
-  changedAttributes: Partial<A>
-  thereAreChanges: boolean
-  errors: ValidationErrors<A>
-  isValid: boolean
-  isInvalid: boolean
-  showErrors: boolean
-  setShowErrors: React.Dispatch<React.SetStateAction<boolean>>
-  setKnownErrors: React.Dispatch<React.SetStateAction<ValidationErrors<A>>>
-  reset: (newInitialValues: Partial<A>) => void
-}
-
-export function useValidation<A extends Record<string, any>>(
-  attributes: Partial<A>, 
-  ValidationClass: typeof BaseValidation, 
-  schema?: string | string[]
-): UseValidationReturn<A> {
+export function useValidation<A extends Record<string, any>>(attributes: Partial<A>, ValidationClass: typeof BaseValidation, schema?: string | string[]): UseValidationReturn<A> {
   const [errors, setErrors] = React.useState<ValidationErrors<A>>({})
   const [showErrors, setShowErrors] = React.useState(false)
   const [knownErrors, setKnownErrors] = React.useState<ValidationErrors<A>>({})
